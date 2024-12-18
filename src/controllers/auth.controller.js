@@ -1,11 +1,10 @@
 import jwt from "jsonwebtoken";
 import Auth from "../models/auth.modal.js";
 
-// Login User
+// Login admin
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
-    console.log(email, password, "email, password");
 
     // Validate required fields
     const missingFields = [];
@@ -19,17 +18,17 @@ const loginUser = async (req, res) => {
       });
     }
 
-    // Check if the user exists
-    const user = await Auth.findOne({ email });
-    if (!user) {
+    // Check if the admin exists
+    const admin = await Auth.findOne({ email });
+    if (!admin) {
       return res.status(404).json({
         success: false,
-        message: "User not found.",
+        message: "Admin not found.",
       });
     }
 
-    // Validate the password (assuming passwords are stored as plain text)
-    if (user.password !== password) {
+    // Validate the password
+    if (admin.password !== password) {
       return res.status(401).json({
         success: false,
         message: "Invalid credentials.",
@@ -38,7 +37,7 @@ const loginUser = async (req, res) => {
 
     // Generate JWT token
     const token = jwt.sign(
-      { id: user._id, email: user.email, role: user.role },
+      { id: admin._id, email: admin.email, role: admin.role },
       process.env.JWT_SECRET,
       {
         expiresIn: "2d",
@@ -47,14 +46,14 @@ const loginUser = async (req, res) => {
 
     // Set the token in cookies
     res.cookie("token", token, {
-      httpOnly: true, // Prevents client-side access to the cookie
-      secure: process.env.NODE_ENV === "production", // Sends cookies over HTTPS in production
-      sameSite: "Strict", // Ensures cookies are only sent to the same site
-      maxAge: 2 * 24 * 60 * 60 * 1000, // 2 days
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Strict",
+      maxAge: 2 * 24 * 60 * 60 * 1000,
     });
 
     // Send response excluding sensitive data
-    const { userName, email: userEmail, role } = user;
+    const { userName, email: userEmail, role } = admin;
     res.status(200).json({
       success: true,
       message: "Login successful.",
