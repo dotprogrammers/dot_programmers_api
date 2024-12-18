@@ -53,11 +53,11 @@ const loginUser = async (req, res) => {
     });
 
     // Send response excluding sensitive data
-    const { userName, email: userEmail, role } = admin;
+    const { userName, email: userEmail, role, image } = admin;
     res.status(200).json({
       success: true,
       message: "Login successful.",
-      payload: { userName, email: userEmail, role, token },
+      payload: { userName, email: userEmail, role, token, image },
     });
   } catch (error) {
     res.status(500).json({
@@ -88,4 +88,31 @@ const logout = async (req, res) => {
   }
 };
 
-export { loginUser, logout };
+// Get Admin
+const getAdmin = async (req, res) => {
+  try {
+    const adminEmail = req.admin.email;
+
+    // Find the admin by the decoded ID
+    const admin = await Auth.find({ email: adminEmail });
+    if (!admin) {
+      return res.status(404).json({
+        success: false,
+        message: "Admin not found.",
+      });
+    }
+
+    // Respond with the admin details
+    res.status(200).json({
+      success: true,
+      payload: admin,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message || "An error occurred while fetching the admin.",
+    });
+  }
+};
+
+export { getAdmin, loginUser, logout };

@@ -1,12 +1,12 @@
 import express from "express";
 
-import multer from "multer";
-import { loginUser, logout } from "../controllers/auth.controller.js";
+import { getAdmin, loginUser, logout } from "../controllers/auth.controller.js";
+import verifyToken from "../middlewares/verifyToken.js";
 const authRouter = express.Router();
-const upload = multer();
 
 // User registration and login routes
-authRouter.post("/login", upload.none(), loginUser);
+authRouter.post("/login", loginUser);
 authRouter.post("/logout", logout);
+authRouter.get("/admin", verifyToken, getAdmin);
 
 export default authRouter;

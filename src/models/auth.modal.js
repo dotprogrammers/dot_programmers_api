@@ -3,6 +3,7 @@ import { model, Schema } from "mongoose";
 // auth schema
 const authSchema = new Schema(
   {
+    name: { type: "string" },
     email: {
       type: String,
       required: [true, "Email is required."],
@@ -19,6 +20,7 @@ const authSchema = new Schema(
       required: true,
       minlength: [8, "Password must be at least 8 characters long."],
     },
+    image: { type: String },
     role: { type: String, default: "admin" },
     token: { type: String },
   },
