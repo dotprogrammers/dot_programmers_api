@@ -9,7 +9,13 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const getServices = async (req, res) => {
   try {
     const { skip, limit } = req.pagination;
-    const services = await Service.find({}).skip(skip).limit(limit);
+    let query = {};
+    if (req.headers["x-source"] === "admin") {
+      query = {};
+    } else if (req.headers["x-source"] === "frontend") {
+      query = { status: 1 };
+    }
+    const services = await Service.find(query).skip(skip).limit(limit);
     const totalDataCount = await Service.countDocuments();
 
     res.status(200).json({
