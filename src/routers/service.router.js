@@ -21,7 +21,7 @@ serviceRouter.post(
 );
 serviceRouter.delete("/delete-service/:id", verifyToken, deleteService);
 serviceRouter.patch(
-  "/edit-service",
+  "/update-service",
   verifyToken,
   upload.single("image"),
   updateService

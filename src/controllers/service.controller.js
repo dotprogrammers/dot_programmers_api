@@ -1,10 +1,16 @@
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 import Service from "../models/service.model.js";
+
+// Define __dirname
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const getServices = async (req, res) => {
   try {
     const { skip, limit } = req.pagination;
     const services = await Service.find({}).skip(skip).limit(limit);
-    const totalDataCount = services.length > 0 ? services.length : 0;
+    const totalDataCount = await Service.countDocuments();
 
     res.status(200).json({
       success: true,
@@ -38,6 +44,15 @@ const addService = async (req, res) => {
         message: `${missingFields.join(", ")} field(s) are required.`,
       });
     }
+
+    // const existingService = await Service.findOne({ name });
+
+    // if (existingService) {
+    //   return res.status(404).json({
+    //     success: false,
+    //     message: "Service already presented.",
+    //   });
+    // }
 
     // Create a new service document
     const newService = new Service({
@@ -81,7 +96,7 @@ const deleteService = async (req, res) => {
       });
     }
 
-    // Delete the associated image if it exists
+    // Optionally, delete the image file when deleting the service
     if (service.image) {
       const imagePath = path.join(
         __dirname,
@@ -94,12 +109,11 @@ const deleteService = async (req, res) => {
         fs.unlinkSync(imagePath);
       }
     }
-
     res.json({ success: true, message: "Service deleted successfully." });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: "Failed to delete service",
+      message: error.message || "An error occurred while deleting the service.",
     });
   }
 };
@@ -119,7 +133,7 @@ const updateService = async (req, res) => {
       });
     }
 
-    // Fetch the current course data
+    // Fetch the current service data
     const service = await Service.findById(id);
 
     if (!service) {
