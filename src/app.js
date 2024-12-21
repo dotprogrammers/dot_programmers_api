@@ -9,6 +9,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import authRouter from "./routers/auth.router.js";
 import serviceRouter from "./routers/service.router.js";
+import teamMemberRouter from "./routers/teamMember.router.js";
 const app = express();
 
 // middleware
@@ -53,6 +54,7 @@ app.use("/images", express.static(path.join(__dirname, "images")));
 // All router middleware
 app.use("/api", authRouter);
 app.use("/api", serviceRouter);
+app.use("/api", teamMemberRouter);
 
 // 404 Not Found Handler
 app.use((req, res, next) => {
