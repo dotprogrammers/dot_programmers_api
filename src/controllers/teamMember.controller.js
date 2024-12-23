@@ -97,7 +97,6 @@ const addTeamMember = async (req, res) => {
     res.status(201).json({
       success: true,
       message: "Member added successfully",
-      data: newTeamMember,
     });
   } catch (error) {
     console.error("Error adding team member:", error);
@@ -214,7 +213,6 @@ const updateTeamMember = async (req, res) => {
         });
       }
     }
-
 
     // Delete the image from the server after successful upload
     try {
