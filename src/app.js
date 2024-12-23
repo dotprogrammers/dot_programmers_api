@@ -11,6 +11,7 @@ import authRouter from "./routers/auth.router.js";
 import privacyPolicyRouter from "./routers/privacypolicy.router.js";
 import serviceRouter from "./routers/service.router.js";
 import teamMemberRouter from "./routers/teamMember.router.js";
+import termsAndConditionsRouter from "./routers/termsAndConditions.router.js";
 const app = express();
 
 // middleware
@@ -57,6 +58,7 @@ app.use("/api", authRouter);
 app.use("/api", serviceRouter);
 app.use("/api", teamMemberRouter);
 app.use("/api", privacyPolicyRouter);
+app.use("/api", termsAndConditionsRouter);
 
 // 404 Not Found Handler
 app.use((req, res, next) => {
