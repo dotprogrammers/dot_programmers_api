@@ -7,6 +7,7 @@ const siteConfigurationSchema = new Schema(
       type: String,
       required: [true, "Description required!"],
     },
+    copyRights: { type: String, required: [true, "Copy rights required!"] },
   },
   { timestamps: true }
 );

@@ -16,7 +16,7 @@ const getSiteConfiguration = async (req, res) => {
 
 const updateSiteConfiguration = async (req, res) => {
   try {
-    const { id, title, description } = req.body;
+    const { id, title, description, copyRights } = req.body;
 
     if (!id) {
       return res.status(400).json({
@@ -38,7 +38,7 @@ const updateSiteConfiguration = async (req, res) => {
     // Update the database with the new fields
     await SiteConfiguration.findByIdAndUpdate(
       id,
-      { title, description },
+      { title, description, copyRights },
       {
         new: true,
       }
