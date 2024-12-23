@@ -1,3 +1,4 @@
+import fs from "fs";
 import cloudinary from "../config/cloudinary.config.js";
 import LogoAndFavicon from "../models/logoAndFavicon.modal.js";
 
@@ -49,6 +50,14 @@ const updateLogoAndFavicon = async (req, res) => {
       });
       updatedFields.logoLink = logoResult.secure_url;
       updatedFields.logoPublicId = logoResult.public_id;
+
+      try {
+        if (fs.existsSync(req.files.logoLink[0].path)) {
+          fs.unlinkSync(req.files.logoLink[0].path);
+        }
+      } catch (deleteError) {
+        console.error("Error deleting file from server:", deleteError.message);
+      }
     }
 
     if (req.files.faviconLink) {
@@ -63,22 +72,27 @@ const updateLogoAndFavicon = async (req, res) => {
       });
       updatedFields.faviconLink = faviconResult.secure_url;
       updatedFields.faviconPublicId = faviconResult.public_id;
+
+      try {
+        if (fs.existsSync(req.files.faviconLink[0].path)) {
+
+          fs.unlinkSync(req.files.faviconLink[0].path);
+        }
+      } catch (deleteError) {
+        console.error("Error deleting file from server:", deleteError.message);
+      }
     }
 
     // Update database
-    const updatedLogoAndFavicon = await LogoAndFavicon.findByIdAndUpdate(
-      id,
-      updatedFields,
-      { new: true }
-    );
+    await LogoAndFavicon.findByIdAndUpdate(id, updatedFields, { new: true });
 
     res.status(200).json({
       success: true,
       message: "Logo and favicon updated successfully!",
-      payload: updatedLogoAndFavicon,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
 export { getLogoAndFavicon, updateLogoAndFavicon };
