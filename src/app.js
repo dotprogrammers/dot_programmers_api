@@ -12,6 +12,7 @@ import contactInfoRouter from "./routers/contactInfo.router.js";
 import privacyPolicyRouter from "./routers/privacypolicy.router.js";
 import serviceRouter from "./routers/service.router.js";
 import siteConfigurationRouter from "./routers/siteConfiguration.router.js";
+import socialMediaRouter from "./routers/socialmedia.router.js";
 import teamMemberRouter from "./routers/teamMember.router.js";
 import termsAndConditionsRouter from "./routers/termsAndConditions.router.js";
 const app = express();
@@ -63,6 +64,7 @@ app.use("/api", privacyPolicyRouter);
 app.use("/api", termsAndConditionsRouter);
 app.use("/api", siteConfigurationRouter);
 app.use("/api", contactInfoRouter);
+app.use("/api", socialMediaRouter);
 
 // 404 Not Found Handler
 app.use((req, res, next) => {
