@@ -1,10 +1,6 @@
 import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
+import cloudinary from "../config/cloudinary.config.js";
 import TeamMember from "../models/teamMember.model.js";
-
-// Define __dirname
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const getTeamMembers = async (req, res) => {
   try {
@@ -37,14 +33,20 @@ const addTeamMember = async (req, res) => {
   try {
     const { name, designation, facebookLink, linkedinLink, whatsappNumber } =
       req.body;
-    const image = process.env.APP_URL + "/images/" + req.file.filename;
+
+    // Ensure file is uploaded
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "Member Image is required.",
+      });
+    }
 
     // Validate required fields
     const missingFields = [];
     if (!name) missingFields.push("Name");
     if (!designation) missingFields.push("Designation");
     if (!whatsappNumber) missingFields.push("Whatsapp Number");
-    if (!image) missingFields.push("Member Image");
 
     if (missingFields.length > 0) {
       return res.status(400).json({
@@ -53,42 +55,72 @@ const addTeamMember = async (req, res) => {
       });
     }
 
-    // Create a new member document
+    // Upload to Cloudinary
+    const imagePath = req.file.path; // Path of the file on the server
+    let cloudinaryResult;
+
+    try {
+      cloudinaryResult = await cloudinary.uploader.upload(imagePath, {
+        folder: "dot_programmer",
+      });
+    } catch (uploadError) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to upload image to Cloudinary",
+        error: uploadError.message,
+      });
+    }
+
+    // Delete the image from the server after successful upload
+    try {
+      if (fs.existsSync(imagePath)) {
+        fs.unlinkSync(imagePath);
+      }
+    } catch (deleteError) {
+      console.error("Error deleting file from server:", deleteError.message);
+    }
+
+    // Save the team member to the database
     const newTeamMember = new TeamMember({
       name,
       designation,
       facebookLink,
       linkedinLink,
       whatsappNumber,
-      image: image,
+      image: cloudinaryResult.secure_url,
+      imagePublicId: cloudinaryResult.public_id,
       status: 1,
     });
 
-    // Save to database
     await newTeamMember.save();
 
     res.status(201).json({
       success: true,
       message: "Member added successfully",
+      data: newTeamMember,
     });
   } catch (error) {
+    console.error("Error adding team member:", error);
     res.status(500).json({
       success: false,
       message: "Failed to add member",
+      error: error.message,
     });
   }
 };
-
 const deleteTeamMember = async (req, res) => {
   try {
     const { id } = req.params;
+
     if (!id) {
-      return res.status(404).json({
+      return res.status(400).json({
         success: false,
-        message: "Please provide member id!",
+        message: "Please provide member ID!",
       });
     }
-    const teamMember = await TeamMember.findByIdAndDelete(id);
+
+    // Find the member to delete
+    const teamMember = await TeamMember.findById(id);
 
     if (!teamMember) {
       return res.status(404).json({
@@ -97,40 +129,49 @@ const deleteTeamMember = async (req, res) => {
       });
     }
 
-    // Optionally, delete the image file when deleting the member
+    // Delete the image from Cloudinary
     if (teamMember.image) {
-      const imagePath = path.join(
-        __dirname,
-        "..",
-        "images",
-        path.basename(teamMember.image)
-      );
+      const publicId = teamMember.imagePublicId;
 
-      if (fs.existsSync(imagePath)) {
-        fs.unlinkSync(imagePath);
+      try {
+        await cloudinary.uploader.destroy(publicId);
+      } catch (cloudinaryError) {
+        console.error(
+          "Error deleting image from Cloudinary:",
+          cloudinaryError.message
+        );
+        return res.status(500).json({
+          success: false,
+          message: "Failed to delete image from Cloudinary.",
+          error: cloudinaryError.message,
+        });
       }
     }
-    res.json({ success: true, message: "Member deleted successfully." });
+
+    // Delete the member from the database
+    await TeamMember.findByIdAndDelete(id);
+
+    res.json({
+      success: true,
+      message: "Member deleted successfully.",
+    });
   } catch (error) {
+    console.error("Error deleting team member:", error);
     res.status(500).json({
       success: false,
-      message: error.message || "An error occurred while deleting the member.",
+      message: error.message || "An error occurred while deleting the service.",
     });
   }
 };
 
 const updateTeamMember = async (req, res) => {
   try {
-    const { id, image, ...otherFields } = req.body;
-
-    const images = req.file
-      ? process.env.APP_URL + "/images/" + req.file.filename
-      : null;
+    const { id, ...otherFields } = req.body;
 
     if (!id) {
       return res.status(400).json({
         success: false,
-        message: "Please provide member id!",
+        message: "Please provide a valid member ID!",
       });
     }
 
@@ -140,46 +181,63 @@ const updateTeamMember = async (req, res) => {
     if (!teamMember) {
       return res.status(404).json({
         success: false,
-        message: "Member not found!",
+        message: "Team member not found!",
       });
     }
 
-    // Update only the provided fields
-    let updatedFields = {
-      image: images && images,
-      ...otherFields,
-    };
+    // Handle image update if a new file is provided
+    let updatedFields = { ...otherFields };
 
-    if (images) {
-      // Delete the old image file when updating the member
-      if (teamMember.image) {
-        const oldImagePath = path.join(
-          __dirname,
-          "..",
-          "images",
-          path.basename(teamMember.image)
-        );
-        if (fs.existsSync(oldImagePath)) {
-          fs.unlinkSync(oldImagePath);
+    if (req.file) {
+      try {
+        // Delete the previous image from Cloudinary
+        if (teamMember.imagePublicId) {
+          await cloudinary.uploader.destroy(teamMember.imagePublicId);
         }
+
+        // Upload the new image to Cloudinary
+        const cloudinaryResult = await cloudinary.uploader.upload(
+          req.file.path,
+          {
+            folder: "dot_programmer",
+          }
+        );
+
+        // Add the new image data to updated fields
+        updatedFields.image = cloudinaryResult.secure_url;
+        updatedFields.imagePublicId = cloudinaryResult.public_id;
+      } catch (imageError) {
+        return res.status(500).json({
+          success: false,
+          message: "Image update failed.",
+          error: imageError.message,
+        });
       }
-      updatedFields = {
-        image: images && images,
-        ...otherFields,
-      };
-    } else {
-      updatedFields = {
-        ...otherFields,
-      };
     }
 
-    await TeamMember.findByIdAndUpdate(id, updatedFields, {
-      new: true,
-    });
+
+    // Delete the image from the server after successful upload
+    try {
+      if (fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+    } catch (deleteError) {
+      console.error("Error deleting file from server:", deleteError.message);
+    }
+
+    // Update the database with the new fields
+    const updatedMember = await TeamMember.findByIdAndUpdate(
+      id,
+      updatedFields,
+      {
+        new: true,
+      }
+    );
 
     res.status(200).json({
       success: true,
-      message: "Member updated successfully.",
+      message: "Team member updated successfully.",
+      data: updatedMember,
     });
   } catch (error) {
     res.status(500).json({

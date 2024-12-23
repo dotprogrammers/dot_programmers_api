@@ -14,6 +14,7 @@ const teamMemberSchema = new Schema(
       required: [true, "Member whatsapp number required!"],
     },
     image: { type: String, required: [true, "Member image required!"] },
+    imagePublicId: { type: String },
     status: { type: Number, default: 1 },
   },
   { timestamps: true }

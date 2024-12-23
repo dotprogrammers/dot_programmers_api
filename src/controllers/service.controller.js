@@ -1,10 +1,7 @@
 import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
 import Service from "../models/service.model.js";
 
-// Define __dirname
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+import cloudinary from "../config/cloudinary.config.js";
 
 const getServices = async (req, res) => {
   try {
@@ -36,13 +33,19 @@ const getServices = async (req, res) => {
 const addService = async (req, res) => {
   try {
     const { name, description } = req.body;
-    const image = process.env.APP_URL + "/images/" + req.file.filename;
+
+    // Ensure file is uploaded
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "Service Image is required.",
+      });
+    }
 
     // Validate required fields
     const missingFields = [];
     if (!name) missingFields.push("Name");
     if (!description) missingFields.push("Description");
-    if (!image) missingFields.push("Service Image");
 
     if (missingFields.length > 0) {
       return res.status(400).json({
@@ -51,20 +54,44 @@ const addService = async (req, res) => {
       });
     }
 
-    // const existingService = await Service.findOne({ name });
+    // Upload to Cloudinary
+    const imagePath = req.file.path;
+    let cloudinaryResult;
 
-    // if (existingService) {
-    //   return res.status(404).json({
-    //     success: false,
-    //     message: "Service already presented.",
-    //   });
-    // }
+    try {
+      cloudinaryResult = await cloudinary.uploader.upload(imagePath, {
+        folder: "dot_programmer",
+      });
+    } catch (uploadError) {
+      try {
+        if (fs.existsSync(imagePath)) {
+          fs.unlinkSync(imagePath);
+        }
+      } catch (deleteError) {
+        console.error("Error deleting file from server:", deleteError.message);
+      }
+      return res.status(500).json({
+        success: false,
+        message: "Failed to upload image to Cloudinary",
+        error: uploadError.message,
+      });
+    }
+
+    // Delete the image from the server after successful upload
+    try {
+      if (fs.existsSync(imagePath)) {
+        fs.unlinkSync(imagePath);
+      }
+    } catch (deleteError) {
+      console.error("Error deleting file from server:", deleteError.message);
+    }
 
     // Create a new service document
     const newService = new Service({
       name,
       description,
-      image: image,
+      image: cloudinaryResult.secure_url,
+      imagePublicId: cloudinaryResult.public_id,
       status: 1,
     });
 
@@ -93,7 +120,7 @@ const deleteService = async (req, res) => {
         message: "Please provide service id!",
       });
     }
-    const service = await Service.findByIdAndDelete(id);
+    const service = await Service.findById(id);
 
     if (!service) {
       return res.status(404).json({
@@ -102,19 +129,28 @@ const deleteService = async (req, res) => {
       });
     }
 
-    // Optionally, delete the image file when deleting the service
+    // Delete the image from Cloudinary
     if (service.image) {
-      const imagePath = path.join(
-        __dirname,
-        "..",
-        "images",
-        path.basename(service.image)
-      );
+      const publicId = service.imagePublicId;
 
-      if (fs.existsSync(imagePath)) {
-        fs.unlinkSync(imagePath);
+      try {
+        await cloudinary.uploader.destroy(publicId);
+      } catch (cloudinaryError) {
+        console.error(
+          "Error deleting image from Cloudinary:",
+          cloudinaryError.message
+        );
+        return res.status(500).json({
+          success: false,
+          message: "Failed to delete image from Cloudinary.",
+          error: cloudinaryError.message,
+        });
       }
     }
+
+    // Delete the service from the database
+    await service.findByIdAndDelete(id);
+
     res.json({ success: true, message: "Service deleted successfully." });
   } catch (error) {
     res.status(500).json({
@@ -126,16 +162,12 @@ const deleteService = async (req, res) => {
 
 const updateService = async (req, res) => {
   try {
-    const { id, image, ...otherFields } = req.body;
-
-    const images = req.file
-      ? process.env.APP_URL + "/images/" + req.file.filename
-      : null;
+    const { id, ...otherFields } = req.body;
 
     if (!id) {
       return res.status(400).json({
         success: false,
-        message: "Please provide service id!",
+        message: "Please provide a valid service ID!",
       });
     }
 
@@ -149,35 +181,46 @@ const updateService = async (req, res) => {
       });
     }
 
-    // Update only the provided fields
-    let updatedFields = {
-      image: images && images,
-      ...otherFields,
-    };
+    // Handle image update if a new file is provided
+    let updatedFields = { ...otherFields };
 
-    if (images) {
-      // Delete the old image file when updating the service
-      if (service.image) {
-        const oldImagePath = path.join(
-          __dirname,
-          "..",
-          "images",
-          path.basename(service.image)
-        );
-        if (fs.existsSync(oldImagePath)) {
-          fs.unlinkSync(oldImagePath);
+    if (req.file) {
+      try {
+        // Delete the previous image from Cloudinary
+        if (service.imagePublicId) {
+          await cloudinary.uploader.destroy(service.imagePublicId);
         }
+
+        // Upload the new image to Cloudinary
+        const cloudinaryResult = await cloudinary.uploader.upload(
+          req.file.path,
+          {
+            folder: "dot_programmer",
+          }
+        );
+
+        // Add the new image data to updated fields
+        updatedFields.image = cloudinaryResult.secure_url;
+        updatedFields.imagePublicId = cloudinaryResult.public_id;
+      } catch (imageError) {
+        return res.status(500).json({
+          success: false,
+          message: "Image update failed.",
+          error: imageError.message,
+        });
       }
-      updatedFields = {
-        image: images && images,
-        ...otherFields,
-      };
-    } else {
-      updatedFields = {
-        ...otherFields,
-      };
     }
 
+    // Delete the image from the server after successful upload
+    try {
+      if (fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+    } catch (deleteError) {
+      console.error("Error deleting file from server:", deleteError.message);
+    }
+
+    // Update the database with the new fields
     const updatedService = await Service.findByIdAndUpdate(id, updatedFields, {
       new: true,
     });

@@ -8,6 +8,7 @@ const serviceSchema = new Schema(
       required: [true, "Service Description required!"],
     },
     image: { type: String, required: [true, "Service image required!"] },
+    imagePublicId: { type: String },
     status: { type: Number, default: 1 },
   },
   { timestamps: true }
