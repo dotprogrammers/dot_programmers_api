@@ -9,6 +9,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import aboutUsRouter from "./routers/aboutUs.router.js";
 import authRouter from "./routers/auth.router.js";
+import ceoRouter from "./routers/ceo.router.js";
 import contactInfoRouter from "./routers/contactInfo.router.js";
 import logoAndFaviconRouter from "./routers/logoAndFavicon.router.js";
 import privacyPolicyRouter from "./routers/privacypolicy.router.js";
@@ -71,6 +72,7 @@ app.use("/api", contactInfoRouter);
 app.use("/api", socialMediaRouter);
 app.use("/api", logoAndFaviconRouter);
 app.use("/api", aboutUsRouter);
+app.use("/api", ceoRouter);
 
 // 404 Not Found Handler
 app.use((req, res, next) => {
