@@ -13,6 +13,7 @@ import contactInfoRouter from "./routers/contactInfo.router.js";
 import logoAndFaviconRouter from "./routers/logoAndFavicon.router.js";
 import privacyPolicyRouter from "./routers/privacypolicy.router.js";
 import serviceRouter from "./routers/service.router.js";
+import serviceCountRouter from "./routers/serviceCount.router.js";
 import siteConfigurationRouter from "./routers/siteConfiguration.router.js";
 import socialMediaRouter from "./routers/socialmedia.router.js";
 import teamMemberRouter from "./routers/teamMember.router.js";
@@ -61,6 +62,7 @@ app.use("/images", express.static(path.join(__dirname, "images")));
 // All router middleware
 app.use("/api", authRouter);
 app.use("/api", serviceRouter);
+app.use("/api", serviceCountRouter);
 app.use("/api", teamMemberRouter);
 app.use("/api", privacyPolicyRouter);
 app.use("/api", termsAndConditionsRouter);
