@@ -8,6 +8,7 @@ import morgan from "morgan";
 import path from "path";
 import { fileURLToPath } from "url";
 import authRouter from "./routers/auth.router.js";
+import privacyPolicyRouter from "./routers/privacypolicy.router.js";
 import serviceRouter from "./routers/service.router.js";
 import teamMemberRouter from "./routers/teamMember.router.js";
 const app = express();
@@ -55,6 +56,7 @@ app.use("/images", express.static(path.join(__dirname, "images")));
 app.use("/api", authRouter);
 app.use("/api", serviceRouter);
 app.use("/api", teamMemberRouter);
+app.use("/api", privacyPolicyRouter);
 
 // 404 Not Found Handler
 app.use((req, res, next) => {
