@@ -43,7 +43,10 @@ if (!fs.existsSync(uploadDir)) {
 // Middleware setup
 app.use(
   cors({
-    origin: "*",
+    origin: [
+      "http://localhost:5173",
+      "https://dot-programmer-private-admin.vercel.app",
+    ],
     credentials: true,
   })
 );
