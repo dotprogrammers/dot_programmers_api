@@ -149,7 +149,7 @@ const deleteService = async (req, res) => {
     }
 
     // Delete the service from the database
-    await service.findByIdAndDelete(id);
+    await Service.findByIdAndDelete(id);
 
     res.json({ success: true, message: "Service deleted successfully." });
   } catch (error) {
