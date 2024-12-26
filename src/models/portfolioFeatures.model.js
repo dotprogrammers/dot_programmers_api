@@ -10,7 +10,7 @@ const portfolioFeaturesSchema = new Schema(
       type: String,
       required: [true, "Portfolio feature Description required!"],
     },
-    portfolioFeaturesId: {
+    portfolioId: {
       type: Schema.Types.ObjectId,
       ref: "Portfolio",
       required: true,

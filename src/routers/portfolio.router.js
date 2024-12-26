@@ -2,6 +2,7 @@ import express from "express";
 import {
   addPortfolio,
   deletePortfolio,
+  getAllPortfolios,
   getPortfolio,
   updatePortfolio,
   viewPortfolio,
@@ -13,6 +14,7 @@ import { upload } from "../upload/upload.js";
 const portfolioRouter = express.Router();
 
 portfolioRouter.get("/portfolio", paginationMiddleware, getPortfolio);
+portfolioRouter.get("/all-portfolios", getAllPortfolios);
 portfolioRouter.post(
   "/add-portfolio",
   verifyToken,

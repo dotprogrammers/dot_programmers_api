@@ -14,6 +14,12 @@ const portfolioSchema = new Schema(
       required: [true, "Portfolio demo link required!"],
     },
     status: { type: Number, default: 1 },
+    features: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "PortfolioFeatures", // Reference to the PortfolioFeatures model
+      },
+    ], // Array of PortfolioFeatures IDs
   },
   { timestamps: true }
 );

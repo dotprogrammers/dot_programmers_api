@@ -3,25 +3,46 @@ import fs from "fs";
 import cloudinary from "../config/cloudinary.config.js";
 import Portfolio from "./../models/portfolio.model.js";
 
+const getAllPortfolios = async (req, res) => {
+  try {
+    const portfolio = await Portfolio.find().select("_id name");
+
+    res.status(200).json({
+      success: true,
+      payload: portfolio,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 const getPortfolio = async (req, res) => {
   try {
-    const { skip, limit } = req.pagination;
+    const { skip, limit, page } = req.pagination;
+
     let query = {};
+
     if (req.headers["x-source"] === "admin") {
-      query = {};
+      query = {}; // Admin gets all portfolios
     } else if (req.headers["x-source"] === "frontend") {
       query = { status: 1 };
     }
-    const portfolio = await Portfolio.find(query).skip(skip).limit(limit);
-    const totalDataCount = await Portfolio.countDocuments();
 
+    const portfolio = await Portfolio.find(query)
+      .skip(skip)
+      .limit(limit)
+      .populate("features", "title description");
+
+    const totalDataCount = await Portfolio.countDocuments(query);
+
+    // Respond with the paginated data and metadata
     res.status(200).json({
       success: true,
       payload: portfolio,
       pagination: {
         totalData: totalDataCount,
         totalPages: Math.ceil(totalDataCount / limit),
-        currentPage: req.pagination.page,
+        currentPage: page,
         limit,
       },
     });
@@ -243,15 +264,23 @@ const updatePortfolio = async (req, res) => {
 
 const viewPortfolio = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id } = req.params; // Get the portfolio ID from the URL parameters
+
+    // Check if the ID is provided
     if (!id) {
       return res.status(404).json({
         success: false,
         message: "Please provide portfolio id!",
       });
     }
-    const portfolio = await Portfolio.findById(id);
 
+    // Fetch the portfolio by ID and populate the 'features' field with PortfolioFeatures data
+    const portfolio = await Portfolio.findById(id).populate(
+      "features",
+      "title, description"
+    ); // Populate the 'features' field with PortfolioFeatures data
+
+    // Check if the portfolio exists
     if (!portfolio) {
       return res.status(404).json({
         success: false,
@@ -259,10 +288,14 @@ const viewPortfolio = async (req, res) => {
       });
     }
 
-    res
-      .status(200)
-      .json({ success: true, message: "Portfolio found.", payload: portfolio });
+    // Respond with the found portfolio and the populated 'features'
+    res.status(200).json({
+      success: true,
+      message: "Portfolio found.",
+      payload: portfolio,
+    });
   } catch (error) {
+    // Handle any errors and send a failure response
     res.status(500).json({
       success: false,
       message:
@@ -270,9 +303,11 @@ const viewPortfolio = async (req, res) => {
     });
   }
 };
+
 export {
   addPortfolio,
   deletePortfolio,
+  getAllPortfolios,
   getPortfolio,
   updatePortfolio,
   viewPortfolio,

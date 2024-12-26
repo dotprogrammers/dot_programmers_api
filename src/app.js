@@ -15,6 +15,7 @@ import coreValueRouter from "./routers/coreValue.router.js";
 import emailConfigurationRouter from "./routers/emailConfiguration.router.js";
 import logoAndFaviconRouter from "./routers/logoAndFavicon.router.js";
 import portfolioRouter from "./routers/portfolio.router.js";
+import portfolioFeaturesRouter from "./routers/portfolioFeatures.router.js";
 import privacyPolicyRouter from "./routers/privacypolicy.router.js";
 import serviceRouter from "./routers/service.router.js";
 import serviceCountRouter from "./routers/serviceCount.router.js";
@@ -82,6 +83,7 @@ app.use("/api", ceoRouter);
 app.use("/api", coreValueRouter);
 app.use("/api", emailConfigurationRouter);
 app.use("/api", portfolioRouter);
+app.use("/api", portfolioFeaturesRouter);
 
 // 404 Not Found Handler
 app.use((req, res, next) => {
