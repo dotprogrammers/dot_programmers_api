@@ -1,5 +1,6 @@
 import fs from "fs";
 
+import mongoose from "mongoose";
 import cloudinary from "../config/cloudinary.config.js";
 import Portfolio from "./../models/portfolio.model.js";
 
@@ -40,11 +41,6 @@ const getPortfolio = async (req, res) => {
         "title description"
       );
     }
-    console.log(portfolio, "portfolio");
-    console.log(
-      JSON.stringify(portfolio[0].features, null, 2),
-      "stringify portfolio"
-    );
 
     const totalDataCount = await Portfolio.countDocuments(query);
 
@@ -279,38 +275,66 @@ const updatePortfolio = async (req, res) => {
 
 const viewPortfolio = async (req, res) => {
   try {
-    const { id } = req.params; // Get the portfolio ID from the URL parameters
+    const { id } = req.params;
 
-    // Check if the ID is provided
-    if (!id) {
-      return res.status(404).json({
+    // Validate the provided ID
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
         success: false,
-        message: "Please provide portfolio id!",
+        message: "Invalid portfolio ID format.",
       });
     }
 
-    // Fetch the portfolio by ID and populate the 'features' field with PortfolioFeatures data
-    const portfolio = await Portfolio.findById(id).populate(
-      "features",
-      "title, description"
-    ); // Populate the 'features' field with PortfolioFeatures data
+    // Define the aggregation pipeline
+    const portfolioPipeline = [
+      {
+        $match: { _id: new mongoose.Types.ObjectId(id) }, // Match the portfolio by ID
+      },
+      {
+        $lookup: {
+          from: "PortfolioFeatures", // Related collection
+          localField: "_id", // Portfolio `_id`
+          foreignField: "portfolioId", // Related field in PortfolioFeatures
+          as: "features", // Alias for the joined data
+        },
+      },
+      {
+        $unwind: {
+          path: "$features",
+          preserveNullAndEmptyArrays: true, // Preserve portfolios without features
+        },
+      },
+      {
+        $group: {
+          _id: "$_id",
+          name: { $first: "$name" },
+          description: { $first: "$description" },
+          category: { $first: "$category" },
+          image: { $first: "$image" },
+          demoLink: { $first: "$demoLink" },
+          features: { $push: "$features" },
+        },
+      },
+    ];
 
-    // Check if the portfolio exists
-    if (!portfolio) {
+    // Execute the aggregation query
+    const portfolio = await Portfolio.aggregate(portfolioPipeline);
+
+    if (!portfolio || portfolio.length === 0) {
       return res.status(404).json({
         success: false,
         message: "Portfolio not found.",
       });
     }
 
-    // Respond with the found portfolio and the populated 'features'
+    // Respond with the portfolio data
     res.status(200).json({
       success: true,
       message: "Portfolio found.",
-      payload: portfolio,
+      payload: portfolio[0], // Since only one portfolio is expected
     });
   } catch (error) {
-    // Handle any errors and send a failure response
+    console.error("Error in viewPortfolio:", error);
     res.status(500).json({
       success: false,
       message:
@@ -318,6 +342,8 @@ const viewPortfolio = async (req, res) => {
     });
   }
 };
+
+export default viewPortfolio;
 
 export {
   addPortfolio,
