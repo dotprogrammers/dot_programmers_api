@@ -4,6 +4,7 @@ import {
   deletePortfolio,
   getAllPortfolios,
   getPortfolio,
+  getPortfolioLimit,
   updatePortfolio,
   viewPortfolio,
 } from "../controllers/portfolio.controller.js";
@@ -14,6 +15,7 @@ import { upload } from "../upload/upload.js";
 const portfolioRouter = express.Router();
 
 portfolioRouter.get("/portfolio", paginationMiddleware, getPortfolio);
+portfolioRouter.get("/portfolio-limit", getPortfolioLimit);
 portfolioRouter.get("/all-portfolios", getAllPortfolios);
 portfolioRouter.post(
   "/add-portfolio",

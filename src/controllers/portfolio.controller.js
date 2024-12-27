@@ -4,6 +4,33 @@ import mongoose from "mongoose";
 import cloudinary from "../config/cloudinary.config.js";
 import Portfolio from "./../models/portfolio.model.js";
 
+const getPortfolioLimit = async (req, res) => {
+  try {
+    const { limit } = req.query;
+
+    const parsedLimit = parseInt(limit) || 6;
+
+    const portfolio = await Portfolio.find(
+      {},
+      "_id name description demoLink image"
+    ).limit(parsedLimit);
+
+    const totalDataCount = await Portfolio.countDocuments();
+
+    res.status(200).json({
+      success: true,
+      payload: portfolio,
+      totalData: totalDataCount,
+      limit: parsedLimit,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message || "An error occurred while fetching portfolios.",
+    });
+  }
+};
+
 const getAllPortfolios = async (req, res) => {
   try {
     const portfolio = await Portfolio.find().select("_id name");
@@ -350,6 +377,7 @@ export {
   deletePortfolio,
   getAllPortfolios,
   getPortfolio,
+  getPortfolioLimit,
   updatePortfolio,
   viewPortfolio,
 };
