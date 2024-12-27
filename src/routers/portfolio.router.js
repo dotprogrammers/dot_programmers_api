@@ -29,5 +29,5 @@ portfolioRouter.patch(
   updatePortfolio
 );
 
-portfolioRouter.get("/view-portfolio/:id", verifyToken, viewPortfolio);
+portfolioRouter.get("/view-portfolio/:id", viewPortfolio);
 export default portfolioRouter;

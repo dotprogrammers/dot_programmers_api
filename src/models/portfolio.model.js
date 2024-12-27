@@ -7,6 +7,10 @@ const portfolioSchema = new Schema(
       type: String,
       required: [true, "Portfolio Description required!"],
     },
+    category: {
+      type: String,
+      required: [true, "Portfolio category required!"],
+    },
     image: { type: String, required: [true, "Portfolio image required!"] },
     imagePublicId: { type: String },
     demoLink: {
@@ -17,9 +21,9 @@ const portfolioSchema = new Schema(
     features: [
       {
         type: Schema.Types.ObjectId,
-        ref: "PortfolioFeatures", // Reference to the PortfolioFeatures model
+        ref: "PortfolioFeatures",
       },
-    ], // Array of PortfolioFeatures IDs
+    ],
   },
   { timestamps: true }
 );

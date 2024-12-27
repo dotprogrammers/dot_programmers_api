@@ -19,19 +19,32 @@ const getAllPortfolios = async (req, res) => {
 const getPortfolio = async (req, res) => {
   try {
     const { skip, limit, page } = req.pagination;
+    const category = req?.query?.category;
 
     let query = {};
-
+    let portfolio;
     if (req.headers["x-source"] === "admin") {
-      query = {}; // Admin gets all portfolios
+      query = {};
+      portfolio = await Portfolio.find(query)
+        .skip(skip)
+        .limit(limit)
+        .populate("features", "title description");
     } else if (req.headers["x-source"] === "frontend") {
-      query = { status: 1 };
+      if (category !== "all") {
+        query = { status: 1, category: category };
+      } else {
+        query = { status: 1 };
+      }
+      portfolio = await Portfolio.find(query).populate(
+        "features",
+        "title description"
+      );
     }
-
-    const portfolio = await Portfolio.find(query)
-      .skip(skip)
-      .limit(limit)
-      .populate("features", "title description");
+    console.log(portfolio, "portfolio");
+    console.log(
+      JSON.stringify(portfolio[0].features, null, 2),
+      "stringify portfolio"
+    );
 
     const totalDataCount = await Portfolio.countDocuments(query);
 
@@ -53,7 +66,7 @@ const getPortfolio = async (req, res) => {
 
 const addPortfolio = async (req, res) => {
   try {
-    const { name, description, demoLink } = req.body;
+    const { name, description, demoLink, category } = req.body;
 
     // Ensure file is uploaded
     if (!req.file) {
@@ -68,6 +81,7 @@ const addPortfolio = async (req, res) => {
     if (!name) missingFields.push("Name");
     if (!description) missingFields.push("Description");
     if (!demoLink) missingFields.push("Demo Link");
+    if (!category) missingFields.push("Category");
 
     if (missingFields.length > 0) {
       return res.status(400).json({
@@ -115,6 +129,7 @@ const addPortfolio = async (req, res) => {
       image: cloudinaryResult.secure_url,
       imagePublicId: cloudinaryResult.public_id,
       demoLink,
+      category,
       status: 1,
     });
 

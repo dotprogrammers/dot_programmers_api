@@ -5,16 +5,17 @@ import ServiceCount from "./../models/serviceCount.model.js";
 
 const getServicesCounts = async (req, res) => {
   try {
-    const { skip, limit } = req.pagination;
+    const { skip, limit } = req.pagination || {};
     let query = {};
+    let servicesCounts;
     if (req.headers["x-source"] === "admin") {
       query = {};
+      servicesCounts = await ServiceCount.find(query).skip(skip).limit(limit);
     } else if (req.headers["x-source"] === "frontend") {
       query = { status: 1 };
+      servicesCounts = await ServiceCount.find();
     }
-    const servicesCounts = await ServiceCount.find(query)
-      .skip(skip)
-      .limit(limit);
+
     const totalDataCount = await ServiceCount.countDocuments();
 
     res.status(200).json({
