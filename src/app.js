@@ -10,10 +10,12 @@ import { fileURLToPath } from "url";
 import aboutUsRouter from "./routers/aboutUs.router.js";
 import authRouter from "./routers/auth.router.js";
 import ceoRouter from "./routers/ceo.router.js";
+import consultationRouter from "./routers/consultation.router.js";
 import contactInfoRouter from "./routers/contactInfo.router.js";
 import coreValueRouter from "./routers/coreValue.router.js";
 import emailConfigurationRouter from "./routers/emailConfiguration.router.js";
 import logoAndFaviconRouter from "./routers/logoAndFavicon.router.js";
+import ourServicesRouter from "./routers/ourServices.router.js";
 import portfolioRouter from "./routers/portfolio.router.js";
 import portfolioFeaturesRouter from "./routers/portfolioFeatures.router.js";
 import privacyPolicyRouter from "./routers/privacypolicy.router.js";
@@ -85,6 +87,8 @@ app.use("/api", coreValueRouter);
 app.use("/api", emailConfigurationRouter);
 app.use("/api", portfolioRouter);
 app.use("/api", portfolioFeaturesRouter);
+app.use("/api", consultationRouter);
+app.use("/api", ourServicesRouter);
 
 // 404 Not Found Handler
 app.use((req, res, next) => {
