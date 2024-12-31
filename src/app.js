@@ -33,6 +33,7 @@ import siteConfigurationRouter from "./routers/siteConfiguration.router.js";
 import socialMediaRouter from "./routers/socialmedia.router.js";
 import subscribeRouter from "./routers/subscribe.router.js";
 import teamMemberRouter from "./routers/teamMember.router.js";
+import technologyRouter from "./routers/technology.router.js";
 import termsAndConditionsRouter from "./routers/termsAndConditions.router.js";
 const app = express();
 
@@ -107,6 +108,7 @@ app.use("/api", ourTechnologyRouter);
 app.use("/api", subscribeRouter);
 app.use("/api", contactRouter);
 app.use("/api", howWeSuccessRouter);
+app.use("/api", technologyRouter);
 
 // 404 Not Found Handler
 app.use((req, res, next) => {
