@@ -12,12 +12,15 @@ import authRouter from "./routers/auth.router.js";
 import ceoRouter from "./routers/ceo.router.js";
 import consultationRouter from "./routers/consultation.router.js";
 import contactInfoRouter from "./routers/contactInfo.router.js";
+import contactUsRouter from "./routers/contactus.router.js";
 import coreValueRouter from "./routers/coreValue.router.js";
 import emailConfigurationRouter from "./routers/emailConfiguration.router.js";
 import howToSuccessRouter from "./routers/howToSuccess.router.js";
 import logoAndFaviconRouter from "./routers/logoAndFavicon.router.js";
 import ourPortfolioRouter from "./routers/ourPortfolio.router.js";
 import ourServicesRouter from "./routers/ourServices.router.js";
+import ourTeamMemberRouter from "./routers/ourTeamMember.router.js";
+import ourTechnologyRouter from "./routers/ourTechnology.router.js";
 import ourTestimonialRouter from "./routers/ourTestimonial.router.js";
 import portfolioRouter from "./routers/portfolio.router.js";
 import portfolioFeaturesRouter from "./routers/portfolioFeatures.router.js";
@@ -95,6 +98,9 @@ app.use("/api", ourServicesRouter);
 app.use("/api", ourPortfolioRouter);
 app.use("/api", ourTestimonialRouter);
 app.use("/api", howToSuccessRouter);
+app.use("/api", contactUsRouter);
+app.use("/api", ourTeamMemberRouter);
+app.use("/api", ourTechnologyRouter);
 
 // 404 Not Found Handler
 app.use((req, res, next) => {
