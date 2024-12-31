@@ -2,6 +2,7 @@ import express from "express";
 import {
   addTechnology,
   deleteTechnology,
+  getCategoryTechnology,
   getTechnology,
   updateTechnology,
 } from "../controllers/technology.controller.js";
@@ -12,6 +13,7 @@ import { upload } from "../upload/upload.js";
 const technologyRouter = express.Router();
 
 technologyRouter.get("/technology", paginationMiddleware, getTechnology);
+technologyRouter.get("/category-technology/:category", getCategoryTechnology);
 technologyRouter.post(
   "/add-technology",
   verifyToken,

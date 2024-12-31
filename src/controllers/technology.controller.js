@@ -2,6 +2,22 @@ import fs from "fs";
 
 import cloudinary from "../config/cloudinary.config.js";
 import Technology from "../models/technology.model.js";
+const getCategoryTechnology = async (req, res) => {
+  try {
+    const { category } = req?.params;
+
+    const query = { status: 1, category: category };
+    const technology = await Technology.find(query);
+
+    // Respond with the paginated data and metadata
+    res.status(200).json({
+      success: true,
+      payload: technology,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
 
 const getTechnology = async (req, res) => {
   try {
@@ -29,90 +45,6 @@ const getTechnology = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
-
-// const addTechnology = async (req, res) => {
-//   try {
-//     const { title, category, description } = req.body;
-
-//     // Ensure file is uploaded
-//     if (!req.file) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "Technology Image is required.",
-//       });
-//     }
-
-//     // Validate required fields
-//     const missingFields = [];
-//     if (!title) missingFields.push("Title");
-//     if (!category) missingFields.push("Category");
-//     if (!description) missingFields.push("Description");
-
-//     if (missingFields.length > 0) {
-//       return res.status(400).json({
-//         success: false,
-//         message: `${missingFields.join(", ")} field(s) are required.`,
-//       });
-//     }
-
-//     // Upload to Cloudinary
-//     const imagePath = req.file.path;
-//     let cloudinaryResult;
-
-//     try {
-//       cloudinaryResult = await cloudinary.uploader.upload(imagePath, {
-//         folder: "dot_programmer",
-//       });
-//     } catch (uploadError) {
-//       try {
-//         if (fs.existsSync(imagePath)) {
-//           fs.unlinkSync(imagePath);
-//         }
-//       } catch (deleteError) {
-//         console.error("Error deleting file from server:", deleteError.message);
-//       }
-//       return res.status(500).json({
-//         success: false,
-//         message: "Failed to upload image to Cloudinary",
-//         error: uploadError.message,
-//       });
-//     }
-
-//     // Delete the image from the server after successful upload
-//     try {
-//       if (fs.existsSync(imagePath)) {
-//         fs.unlinkSync(imagePath);
-//       }
-//     } catch (deleteError) {
-//       console.error("Error deleting file from server:", deleteError.message);
-//     }
-
-//     // Create a new Technology document
-//     const newTechnology = new Technology({
-//       title,
-//       category,
-//       description,
-//       image: cloudinaryResult.secure_url,
-//       imagePublicId: cloudinaryResult.public_id,
-//       status: 1,
-//     });
-//     console.log(newTechnology);
-
-//     // Save to database
-//     await newTechnology.save();
-
-//     res.status(201).json({
-//       success: true,
-//       message: "Technology added successfully",
-//       technology: newTechnology,
-//     });
-//   } catch (error) {
-//     res.status(500).json({
-//       success: false,
-//       message: "Failed to add technology",
-//     });
-//   }
-// };
 
 const addTechnology = async (req, res) => {
   try {
@@ -190,7 +122,6 @@ const addTechnology = async (req, res) => {
       technology: newTechnology,
     });
   } catch (error) {
-    console.log(error);
     res.status(500).json({
       success: false,
       message: "Failed to add technology",
@@ -329,4 +260,10 @@ const updateTechnology = async (req, res) => {
     });
   }
 };
-export { addTechnology, deleteTechnology, getTechnology, updateTechnology };
+export {
+  addTechnology,
+  deleteTechnology,
+  getCategoryTechnology,
+  getTechnology,
+  updateTechnology,
+};
