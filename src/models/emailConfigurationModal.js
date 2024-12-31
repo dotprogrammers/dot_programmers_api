@@ -5,7 +5,7 @@ const emailConfigurationSchema = new Schema(
     emailMailer: { type: String, required: [true, "Email mailer required!"] },
     emailHost: { type: String, required: [true, "Email host required!"] },
     emailPort: { type: Number, required: [true, "Email port required!"] },
-    emailUsername: {
+    emailUserName: {
       type: String,
       required: [true, "Email username required!"],
     },

@@ -1,4 +1,4 @@
-import bcrypt from "bcrypt";
+import encrypt from "../middlewares/encrypt.js";
 import EmailConfiguration from "../models/emailConfigurationModal.js";
 
 const getEmailConfiguration = async (req, res) => {
@@ -45,12 +45,9 @@ const updateEmailConfiguration = async (req, res) => {
 
     const updatedFields = { ...otherFields };
 
-    // If a password is provided, hash it before saving
-    if (emailPassword) {
-      const saltRounds = 10;
-      const hashedPassword = await bcrypt.hash(emailPassword, saltRounds);
-      updatedFields.emailPassword = hashedPassword;
-    }
+    // Encrypt the password
+    const encryptedPassword = encrypt(emailPassword);
+    updatedFields.emailPassword = encryptedPassword;
 
     // Update the database with the new fields
     await EmailConfiguration.findByIdAndUpdate(id, updatedFields, {

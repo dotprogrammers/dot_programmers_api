@@ -29,6 +29,7 @@ import serviceRouter from "./routers/service.router.js";
 import serviceCountRouter from "./routers/serviceCount.router.js";
 import siteConfigurationRouter from "./routers/siteConfiguration.router.js";
 import socialMediaRouter from "./routers/socialmedia.router.js";
+import subscribeRouter from "./routers/subscribe.router.js";
 import teamMemberRouter from "./routers/teamMember.router.js";
 import termsAndConditionsRouter from "./routers/termsAndConditions.router.js";
 const app = express();
@@ -38,8 +39,8 @@ app.use(express.json());
 
 // Rate limiting configuration
 const limiterApi = rateLimit({
-  windowMs: 5 * 60 * 1000, // 5 minutes
-  max: 100, // max 100 requests 5 minutes
+  windowMs: 2 * 60 * 1000, // 5 minutes
+  max: 100, // max 100 requests 2 minutes
   message: "Too many requests from this IP, Please Try Again Later!",
 });
 
@@ -101,6 +102,7 @@ app.use("/api", howToSuccessRouter);
 app.use("/api", contactUsRouter);
 app.use("/api", ourTeamMemberRouter);
 app.use("/api", ourTechnologyRouter);
+app.use("/api", subscribeRouter);
 
 // 404 Not Found Handler
 app.use((req, res, next) => {
