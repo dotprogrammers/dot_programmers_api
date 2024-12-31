@@ -80,8 +80,7 @@ const storeSubscribeUser = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message:
-        error.message || "An error occurred while updating the contact us.",
+      message: error.message || "An error occurred while subscription.",
     });
   }
 };

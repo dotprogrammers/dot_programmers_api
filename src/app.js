@@ -11,6 +11,7 @@ import aboutUsRouter from "./routers/aboutUs.router.js";
 import authRouter from "./routers/auth.router.js";
 import ceoRouter from "./routers/ceo.router.js";
 import consultationRouter from "./routers/consultation.router.js";
+import contactRouter from "./routers/contact.router.js";
 import contactInfoRouter from "./routers/contactInfo.router.js";
 import contactUsRouter from "./routers/contactus.router.js";
 import coreValueRouter from "./routers/coreValue.router.js";
@@ -103,6 +104,7 @@ app.use("/api", contactUsRouter);
 app.use("/api", ourTeamMemberRouter);
 app.use("/api", ourTechnologyRouter);
 app.use("/api", subscribeRouter);
+app.use("/api", contactRouter);
 
 // 404 Not Found Handler
 app.use((req, res, next) => {
