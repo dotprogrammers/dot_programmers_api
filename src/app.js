@@ -14,6 +14,7 @@ import consultationRouter from "./routers/consultation.router.js";
 import contactInfoRouter from "./routers/contactInfo.router.js";
 import coreValueRouter from "./routers/coreValue.router.js";
 import emailConfigurationRouter from "./routers/emailConfiguration.router.js";
+import howToSuccessRouter from "./routers/howToSuccess.router.js";
 import logoAndFaviconRouter from "./routers/logoAndFavicon.router.js";
 import ourPortfolioRouter from "./routers/ourPortfolio.router.js";
 import ourServicesRouter from "./routers/ourServices.router.js";
@@ -93,6 +94,7 @@ app.use("/api", consultationRouter);
 app.use("/api", ourServicesRouter);
 app.use("/api", ourPortfolioRouter);
 app.use("/api", ourTestimonialRouter);
+app.use("/api", howToSuccessRouter);
 
 // 404 Not Found Handler
 app.use((req, res, next) => {
