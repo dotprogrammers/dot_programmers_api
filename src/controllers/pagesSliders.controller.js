@@ -72,6 +72,17 @@ const addPagesSlider = async (req, res) => {
       });
     }
 
+    // Check if the data already exists
+    const existingData = await PagesSlider.findOne({
+      pageName: pageName.trim(),
+    });
+    if (existingData) {
+      return res.status(400).json({
+        success: false,
+        message: "Page name already exists.",
+      });
+    }
+
     // Upload to Cloudinary
     const imagePath = req.file.path;
     let cloudinaryResult;
@@ -182,7 +193,7 @@ const deletePagesSlider = async (req, res) => {
 
 const updatePagesSlider = async (req, res) => {
   try {
-    const { id, ...otherFields } = req.body;
+    const { id, pageName, ...otherFields } = req.body;
 
     if (!id) {
       return res.status(400).json({
@@ -199,6 +210,19 @@ const updatePagesSlider = async (req, res) => {
         success: false,
         message: "Page Slider not found!",
       });
+    }
+
+    // Check if the updated name already exists in another service
+    if (pageName && pageName.trim() !== pageSlider.pageName) {
+      const existingdata = await PagesSlider.findOne({
+        pageName: pageName.trim(),
+      });
+      if (existingdata) {
+        return res.status(400).json({
+          success: false,
+          message: "Page name already exists!",
+        });
+      }
     }
 
     // Handle image update if a new file is provided

@@ -29,6 +29,15 @@ const addCoreValue = async (req, res) => {
       });
     }
 
+    // Check if the data already exists
+    const existingData = await CoreValue.findOne({ title: title.trim() });
+    if (existingData) {
+      return res.status(400).json({
+        success: false,
+        message: "Title already exists.",
+      });
+    }
+
     // Create a new core value document
     const newCoreValue = new CoreValue({
       title,
@@ -83,7 +92,7 @@ const deleteCoreValue = async (req, res) => {
 
 const updateCoreValue = async (req, res) => {
   try {
-    const { id, ...otherFields } = req.body;
+    const { id, title, ...otherFields } = req.body;
 
     if (!id) {
       return res.status(400).json({
@@ -100,6 +109,19 @@ const updateCoreValue = async (req, res) => {
         success: false,
         message: "Core value not found!",
       });
+    }
+
+    // Check if the updated name already exists in another service
+    if (title && title.trim() !== coreValue.title) {
+      const existingdata = await CoreValue.findOne({
+        title: title.trim(),
+      });
+      if (existingdata) {
+        return res.status(400).json({
+          success: false,
+          message: "Title already exists!",
+        });
+      }
     }
 
     // Handle image update if a new file is provided

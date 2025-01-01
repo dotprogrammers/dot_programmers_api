@@ -71,6 +71,15 @@ const addTechnology = async (req, res) => {
       });
     }
 
+    // Check if the data already exists
+    const existingData = await Technology.findOne({ title: title.trim() });
+    if (existingData) {
+      return res.status(400).json({
+        success: false,
+        message: "Technology title already exists.",
+      });
+    }
+
     // Upload to Cloudinary
     const imagePath = req.file.path;
     let cloudinaryResult;
@@ -180,7 +189,7 @@ const deleteTechnology = async (req, res) => {
 
 const updateTechnology = async (req, res) => {
   try {
-    const { id, ...otherFields } = req.body;
+    const { id, title, ...otherFields } = req.body;
 
     if (!id) {
       return res.status(400).json({
@@ -197,6 +206,17 @@ const updateTechnology = async (req, res) => {
         success: false,
         message: "Technology not found!",
       });
+    }
+
+    // Check if the updated name already exists in another service
+    if (title && title.trim() !== technology.title) {
+      const existingService = await Technology.findOne({ title: title.trim() });
+      if (existingService) {
+        return res.status(400).json({
+          success: false,
+          message: "Technology title already exists!",
+        });
+      }
     }
 
     // Handle image update if a new file is provided

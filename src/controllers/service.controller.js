@@ -54,6 +54,15 @@ const addService = async (req, res) => {
       });
     }
 
+    // Check if the data already exists
+    const existingData = await Service.findOne({ name: name.trim() });
+    if (existingData) {
+      return res.status(400).json({
+        success: false,
+        message: "Service name already exists.",
+      });
+    }
+
     // Upload to Cloudinary
     const imagePath = req.file.path;
     let cloudinaryResult;
@@ -162,7 +171,7 @@ const deleteService = async (req, res) => {
 
 const updateService = async (req, res) => {
   try {
-    const { id, ...otherFields } = req.body;
+    const { id, name, ...otherFields } = req.body;
 
     if (!id) {
       return res.status(400).json({
@@ -181,8 +190,22 @@ const updateService = async (req, res) => {
       });
     }
 
+    // Check if the updated name already exists in another service
+    if (name && name.trim() !== service.name) {
+      const existingData = await Service.findOne({ name: name.trim() });
+      if (existingData) {
+        return res.status(400).json({
+          success: false,
+          message: "Service name already exists!",
+        });
+      }
+    }
+
     // Handle image update if a new file is provided
     let updatedFields = { ...otherFields };
+    if (name) {
+      updatedFields.name = name.trim();
+    }
 
     if (req.file) {
       try {

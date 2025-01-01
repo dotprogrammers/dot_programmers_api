@@ -57,6 +57,15 @@ const addServiceCount = async (req, res) => {
       });
     }
 
+    // Check if the data already exists
+    const existingData = await ServiceCount.findOne({ title: title.trim() });
+    if (existingData) {
+      return res.status(400).json({
+        success: false,
+        message: "Service Count title already exists.",
+      });
+    }
+
     // Upload to Cloudinary
     const imagePath = req.file.path;
     let cloudinaryResult;
@@ -165,7 +174,7 @@ const deleteServiceCount = async (req, res) => {
 
 const updateServiceCount = async (req, res) => {
   try {
-    const { id, ...otherFields } = req.body;
+    const { id, title, ...otherFields } = req.body;
 
     if (!id) {
       return res.status(400).json({
@@ -182,6 +191,18 @@ const updateServiceCount = async (req, res) => {
         success: false,
         message: "Service count not found!",
       });
+    }
+
+    if (title && title.trim() !== serviceCount.title) {
+      const existingService = await ServiceCount.findOne({
+        title: title.trim(),
+      });
+      if (existingService) {
+        return res.status(400).json({
+          success: false,
+          message: "Service Count title already exists!",
+        });
+      }
     }
 
     // Handle image update if a new file is provided

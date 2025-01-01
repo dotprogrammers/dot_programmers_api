@@ -43,6 +43,15 @@ const addHowWeSuccess = async (req, res) => {
       });
     }
 
+    // Check if the data already exists
+    const existingData = await HowWeSuccess.findOne({ title: title.trim() });
+    if (existingData) {
+      return res.status(400).json({
+        success: false,
+        message: "Title already exists.",
+      });
+    }
+
     // Create a new how we success document
     const howWeSuccess = new HowWeSuccess({
       title,
@@ -102,7 +111,7 @@ const deleteHowWeSuccess = async (req, res) => {
 
 const updateHowWeSuccess = async (req, res) => {
   try {
-    const { id, ...otherFields } = req.body;
+    const { id, title, ...otherFields } = req.body;
 
     if (!id) {
       return res.status(400).json({
@@ -119,6 +128,19 @@ const updateHowWeSuccess = async (req, res) => {
         success: false,
         message: "How we success not found!",
       });
+    }
+
+    // Check if the updated name already exists in another service
+    if (title && title.trim() !== howWeSuccess.title) {
+      const existingData = await HowWeSuccess.findOne({
+        title: title.trim(),
+      });
+      if (existingData) {
+        return res.status(400).json({
+          success: false,
+          message: "Title already exists!",
+        });
+      }
     }
 
     // Handle image update if a new file is provided
