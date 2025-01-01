@@ -24,6 +24,7 @@ import ourServicesRouter from "./routers/ourServices.router.js";
 import ourTeamMemberRouter from "./routers/ourTeamMember.router.js";
 import ourTechnologyRouter from "./routers/ourTechnology.router.js";
 import ourTestimonialRouter from "./routers/ourTestimonial.router.js";
+import pagesSliderRouter from "./routers/pagesSliders.router.js";
 import portfolioRouter from "./routers/portfolio.router.js";
 import portfolioFeaturesRouter from "./routers/portfolioFeatures.router.js";
 import privacyPolicyRouter from "./routers/privacypolicy.router.js";
@@ -111,6 +112,7 @@ app.use("/api", contactRouter);
 app.use("/api", howWeSuccessRouter);
 app.use("/api", technologyRouter);
 app.use("/api", testimonialRouter);
+app.use("/api", pagesSliderRouter);
 
 // 404 Not Found Handler
 app.use((req, res, next) => {
