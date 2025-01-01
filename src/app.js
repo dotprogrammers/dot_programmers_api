@@ -35,6 +35,7 @@ import subscribeRouter from "./routers/subscribe.router.js";
 import teamMemberRouter from "./routers/teamMember.router.js";
 import technologyRouter from "./routers/technology.router.js";
 import termsAndConditionsRouter from "./routers/termsAndConditions.router.js";
+import testimonialRouter from "./routers/testimonial.router.js";
 const app = express();
 
 // middleware
@@ -109,6 +110,7 @@ app.use("/api", subscribeRouter);
 app.use("/api", contactRouter);
 app.use("/api", howWeSuccessRouter);
 app.use("/api", technologyRouter);
+app.use("/api", testimonialRouter);
 
 // 404 Not Found Handler
 app.use((req, res, next) => {
