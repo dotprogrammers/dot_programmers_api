@@ -6,15 +6,25 @@ import cloudinary from "../config/cloudinary.config.js";
 const getServices = async (req, res) => {
   try {
     const { skip, limit } = req.pagination;
+    const search = req.query.search || ""; // Get the search term from query params
+    const searchRegex = new RegExp(search, "i"); // Create a case-insensitive regex for searching
+
+    // Determine the query based on the source and search term
     let query = {};
     if (req.headers["x-source"] === "admin") {
-      query = {};
+      query = { $or: [{ name: searchRegex }, { description: searchRegex }] };
     } else if (req.headers["x-source"] === "frontend") {
-      query = { status: 1 };
+      query = {
+        status: 1,
+        $or: [{ name: searchRegex }, { description: searchRegex }],
+      };
     }
-    const services = await Service.find(query).skip(skip).limit(limit);
-    const totalDataCount = await Service.countDocuments();
 
+    // Fetch services and total data count
+    const services = await Service.find(query).skip(skip).limit(limit);
+    const totalDataCount = await Service.countDocuments(query);
+
+    // Respond with the data
     res.status(200).json({
       success: true,
       payload: services,
