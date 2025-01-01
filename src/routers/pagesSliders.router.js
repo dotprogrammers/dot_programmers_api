@@ -2,6 +2,7 @@ import express from "express";
 import {
   addPagesSlider,
   deletePagesSlider,
+  getPageNameSider,
   getPagesSliders,
   updatePagesSlider,
 } from "../controllers/pagesSliders.controller.js";
@@ -12,6 +13,7 @@ import { upload } from "../upload/upload.js";
 const pagesSliderRouter = express.Router();
 
 pagesSliderRouter.get("/pages-slider", paginationMiddleware, getPagesSliders);
+pagesSliderRouter.get("/pages-slider/:pageName", getPageNameSider);
 pagesSliderRouter.post(
   "/add-pages-slider",
   verifyToken,

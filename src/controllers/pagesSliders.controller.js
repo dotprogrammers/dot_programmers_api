@@ -3,6 +3,23 @@ import fs from "fs";
 import cloudinary from "../config/cloudinary.config.js";
 import PagesSlider from "./../models/pagesSliders.modal.js";
 
+const getPageNameSider = async (req, res) => {
+  try {
+    const { pageName } = req?.params;
+
+    const query = { status: 1, pageName: pageName };
+    const pageSlider = await PagesSlider.find(query);
+
+    // Respond with the paginated data and metadata
+    res.status(200).json({
+      success: true,
+      payload: pageSlider,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 const getPagesSliders = async (req, res) => {
   try {
     const { skip, limit } = req.pagination;
@@ -249,6 +266,7 @@ const updatePagesSlider = async (req, res) => {
 export {
   addPagesSlider,
   deletePagesSlider,
+  getPageNameSider,
   getPagesSliders,
   updatePagesSlider,
 };
