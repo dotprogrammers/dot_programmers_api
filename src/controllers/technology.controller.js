@@ -22,11 +22,16 @@ const getCategoryTechnology = async (req, res) => {
 const getTechnology = async (req, res) => {
   try {
     const { skip, limit } = req.pagination;
+    const search = req.query.search || "";
+    const searchRegex = new RegExp(search, "i");
     let query = {};
     if (req.headers["x-source"] === "admin") {
-      query = {};
+      query = { $or: [{ title: searchRegex }, { category: searchRegex }] };
     } else if (req.headers["x-source"] === "frontend") {
-      query = { status: 1 };
+      query = {
+        status: 1,
+        $or: [{ title: searchRegex }, { category: searchRegex }],
+      };
     }
     const technology = await Technology.find(query).skip(skip).limit(limit);
     const totalDataCount = await Technology.countDocuments();

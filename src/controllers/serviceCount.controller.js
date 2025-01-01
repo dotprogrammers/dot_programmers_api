@@ -6,13 +6,18 @@ import ServiceCount from "./../models/serviceCount.model.js";
 const getServicesCounts = async (req, res) => {
   try {
     const { skip, limit } = req.pagination || {};
+    const search = req.query.search || "";
+    const searchRegex = new RegExp(search, "i");
     let query = {};
     let servicesCounts;
     if (req.headers["x-source"] === "admin") {
-      query = {};
+      query = { $or: [{ title: searchRegex }] };
       servicesCounts = await ServiceCount.find(query).skip(skip).limit(limit);
     } else if (req.headers["x-source"] === "frontend") {
-      query = { status: 1 };
+      query = {
+        status: 1,
+        $or: [{ title: searchRegex }],
+      };
       servicesCounts = await ServiceCount.find();
     }
 

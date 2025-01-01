@@ -48,20 +48,28 @@ const getPortfolio = async (req, res) => {
   try {
     const { skip, limit, page } = req.pagination;
     const category = req?.query?.category;
-
+    const search = req.query.search || "";
+    const searchRegex = new RegExp(search, "i");
     let query = {};
     let portfolio;
     if (req.headers["x-source"] === "admin") {
-      query = {};
+      query = { $or: [{ name: searchRegex }, { category: searchRegex }] };
       portfolio = await Portfolio.find(query)
         .skip(skip)
         .limit(limit)
         .populate("features", "title description");
     } else if (req.headers["x-source"] === "frontend") {
       if (category !== "all") {
-        query = { status: 1, category: category };
+        query = {
+          status: 1,
+          category: category,
+          $or: [{ name: searchRegex }, { description: searchRegex }],
+        };
       } else {
-        query = { status: 1 };
+        query = {
+          status: 1,
+          $or: [{ name: searchRegex }, { description: searchRegex }],
+        };
       }
       portfolio = await Portfolio.find(query).populate(
         "features",

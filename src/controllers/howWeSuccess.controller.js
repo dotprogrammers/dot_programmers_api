@@ -4,10 +4,15 @@ const getHowWeSuccess = async (req, res) => {
   try {
     const { skip, limit } = req.pagination;
     let query = {};
+    const search = req.query.search || "";
+    const searchRegex = new RegExp(search, "i");
     if (req.headers["x-source"] === "admin") {
-      query = {};
+      query = { $or: [{ title: searchRegex }] };
     } else if (req.headers["x-source"] === "frontend") {
-      query = { status: 1 };
+      query = {
+        status: 1,
+        $or: [{ title: searchRegex }],
+      };
     }
     const howWeSuccess = await HowWeSuccess.find(query).skip(skip).limit(limit);
     const totalDataCount = await HowWeSuccess.countDocuments();

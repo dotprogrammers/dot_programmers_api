@@ -24,10 +24,15 @@ const getPagesSliders = async (req, res) => {
   try {
     const { skip, limit } = req.pagination;
     let query = {};
+    const search = req.query.search || "";
+    const searchRegex = new RegExp(search, "i");
     if (req.headers["x-source"] === "admin") {
-      query = {};
+      query = { $or: [{ title: searchRegex }, { pageName: searchRegex }] };
     } else if (req.headers["x-source"] === "frontend") {
-      query = { status: 1 };
+      query = {
+        status: 1,
+        $or: [{ title: searchRegex }, { pageName: searchRegex }],
+      };
     }
     const pagesSlider = await PagesSlider.find(query).skip(skip).limit(limit);
     const totalDataCount = await PagesSlider.countDocuments();

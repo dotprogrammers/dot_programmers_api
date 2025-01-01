@@ -4,11 +4,16 @@ import PortfolioFeatures from "./../models/portfolioFeatures.model.js";
 const getPortfolioFeatures = async (req, res) => {
   try {
     const { skip, limit } = req.pagination;
+    const search = req.query.search || "";
+    const searchRegex = new RegExp(search, "i");
     let query = {};
     if (req.headers["x-source"] === "admin") {
-      query = {};
+      query = { $or: [{ title: searchRegex }, { description: searchRegex }] };
     } else if (req.headers["x-source"] === "frontend") {
-      query = { status: 1 };
+      query = {
+        status: 1,
+        $or: [{ title: searchRegex }, { description: searchRegex }],
+      };
     }
     const portfolioFeature = await PortfolioFeatures.find(query)
       .skip(skip)
