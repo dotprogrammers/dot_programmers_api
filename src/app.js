@@ -13,7 +13,7 @@ import ceoRouter from "./routers/ceo.router.js";
 import consultationRouter from "./routers/consultation.router.js";
 import contactRouter from "./routers/contact.router.js";
 import contactInfoRouter from "./routers/contactInfo.router.js";
-import contactUsRouter from "./routers/contactus.router.js";
+import contactUsRouter from "./routers/contactUs.router.js";
 import coreValueRouter from "./routers/coreValue.router.js";
 import emailConfigurationRouter from "./routers/emailConfiguration.router.js";
 import howToSuccessRouter from "./routers/howToSuccess.router.js";
