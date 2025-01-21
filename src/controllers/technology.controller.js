@@ -21,19 +21,41 @@ const getTechnology = async (req, res) => {
   try {
     const { skip, limit } = req.pagination;
     const search = req.query.search || "";
+    const category = req.query.category || "";
     const searchRegex = new RegExp(search, "i");
+
+    // Build query object dynamically
     let query = {};
+
+    // Handle "admin" and "frontend" x-source headers
     if (req.headers["x-source"] === "admin") {
-      query = { $or: [{ title: searchRegex }, { category: searchRegex }] };
+      query = {
+        $and: [
+          ...(category ? [{ category }] : []), // Add category filter if provided
+          {
+            $or: [{ title: searchRegex }, { category: searchRegex }],
+          },
+        ],
+      };
     } else if (req.headers["x-source"] === "frontend") {
       query = {
-        status: 1,
-        $or: [{ title: searchRegex }, { category: searchRegex }],
+        $and: [
+          { status: 1 }, // Add status filter for frontend
+          ...(category ? [{ category }] : []), // Add category filter if provided
+          {
+            $or: [{ title: searchRegex }, { category: searchRegex }],
+          },
+        ],
       };
     }
-    const technology = await Technology.find(query).skip(skip).limit(limit);
-    const totalDataCount = await Technology.countDocuments();
 
+    // Fetch filtered technology data
+    const technology = await Technology.find(query).skip(skip).limit(limit);
+
+    // Get the accurate total document count for the current query
+    const totalDataCount = await Technology.countDocuments(query);
+
+    // Send response with pagination details
     res.status(200).json({
       success: true,
       payload: technology,

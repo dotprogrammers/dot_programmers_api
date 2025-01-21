@@ -5,20 +5,33 @@ const getPortfolioFeatures = async (req, res) => {
   try {
     const { skip, limit } = req.pagination;
     const search = req.query.search || "";
+    const portfolioId = req.query.portfolioId || "";
     const searchRegex = new RegExp(search, "i");
     let query = {};
     if (req.headers["x-source"] === "admin") {
-      query = { $or: [{ title: searchRegex }, { description: searchRegex }] };
+      query = {
+        $and: [
+          ...(portfolioId ? [{ portfolioId }] : []),
+          {
+            $or: [{ title: searchRegex }, { description: searchRegex }],
+          },
+        ],
+      };
     } else if (req.headers["x-source"] === "frontend") {
       query = {
-        status: 1,
-        $or: [{ title: searchRegex }, { description: searchRegex }],
+        $and: [
+          { status: 1 },
+          ...(portfolioId ? [{ portfolioId }] : []),
+          {
+            $or: [{ title: searchRegex }, { description: searchRegex }],
+          },
+        ],
       };
     }
     const portfolioFeature = await PortfolioFeatures.find(query)
       .skip(skip)
       .limit(limit);
-    const totalDataCount = await PortfolioFeatures.countDocuments();
+    const totalDataCount = await PortfolioFeatures.countDocuments(query);
 
     res.status(200).json({
       success: true,
