@@ -1,4 +1,3 @@
-import fs from "fs";
 import cloudinary from "../config/cloudinary.config.js";
 import Ceo from "./../models/ceoModel.js";
 const getCeo = async (req, res) => {
@@ -44,18 +43,11 @@ const updateCeo = async (req, res) => {
         if (ceo.imagePublicId) {
           await cloudinary.uploader.destroy(ceo.imagePublicId);
         }
-
-        // Upload the new image to Cloudinary
-        const cloudinaryResult = await cloudinary.uploader.upload(
-          req.file.path,
-          {
-            folder: "dot_programmer",
-          }
-        );
+        const cloudinaryResult = req.file;
 
         // Add the new image data to updated fields
-        updatedFields.image = cloudinaryResult.secure_url;
-        updatedFields.imagePublicId = cloudinaryResult.public_id;
+        updatedFields.image = cloudinaryResult.path;
+        updatedFields.imagePublicId = cloudinaryResult.filename;
       } catch (imageError) {
         return res.status(500).json({
           success: false,
@@ -63,15 +55,6 @@ const updateCeo = async (req, res) => {
           error: imageError.message,
         });
       }
-    }
-
-    // Delete the image from the server after successful upload
-    try {
-      if (fs.existsSync(req.file.path)) {
-        fs.unlinkSync(req.file.path);
-      }
-    } catch (deleteError) {
-      console.error("Error deleting file from server:", deleteError.message);
     }
 
     // Update the database with the new fields

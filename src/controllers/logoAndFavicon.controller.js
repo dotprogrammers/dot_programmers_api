@@ -1,4 +1,3 @@
-import fs from "fs";
 import cloudinary from "../config/cloudinary.config.js";
 import LogoAndFavicon from "../models/logoAndFavicon.modal.js";
 
@@ -38,50 +37,86 @@ const updateLogoAndFavicon = async (req, res) => {
     }
     // Handle file uploads to Cloudinary
     const updatedFields = {};
-    if (req.files.logoLink) {
-      // Delete the previous image from Cloudinary
-      if (logoAndFavicon.logoPublicId) {
-        await cloudinary.uploader.destroy(logoAndFavicon.logoPublicId);
-      }
 
-      const logoFile = req.files.logoLink[0];
-      const logoResult = await cloudinary.uploader.upload(logoFile.path, {
-        folder: "dot_programmer",
-      });
-      updatedFields.logoLink = logoResult.secure_url;
-      updatedFields.logoPublicId = logoResult.public_id;
-
+    if (req.files) {
       try {
-        if (fs.existsSync(req.files.logoLink[0].path)) {
-          fs.unlinkSync(req.files.logoLink[0].path);
+        const cloudinaryResult = req.files;
+        const logoFile = cloudinaryResult.logoLink
+          ? cloudinaryResult.logoLink[0]
+          : null;
+        const faviconFile = cloudinaryResult.faviconLink
+          ? cloudinaryResult.faviconLink[0]
+          : null;
+
+        // Handle logo update
+        if (logoFile) {
+          if (data.logoPublicId) {
+            await cloudinary.uploader.destroy(data.logoPublicId); // Delete old image
+          }
+          updatedFields.logoLink = logoFile.path; // Cloudinary URL for the image
+          updatedFields.logoPublicId = logoFile.filename; // Cloudinary public ID
         }
-      } catch (deleteError) {
-        console.error("Error deleting file from server:", deleteError.message);
+
+        // Handle favicon update
+        if (faviconFile) {
+          if (data.faviconPublicId) {
+            await cloudinary.uploader.destroy(data.faviconPublicId); // Delete old logo
+          }
+          updatedFields.faviconLink = faviconFile.path; // Cloudinary URL for the logo
+          updatedFields.faviconPublicId = faviconFile.filename; // Cloudinary public ID
+        }
+      } catch (imageError) {
+        return res.status(500).json({
+          success: false,
+          message: "File upload failed.",
+          error: imageError.message,
+        });
       }
     }
 
-    if (req.files.faviconLink) {
-      // Delete the previous image from Cloudinary
-      if (logoAndFavicon.faviconPublicId) {
-        await cloudinary.uploader.destroy(logoAndFavicon.faviconPublicId);
-      }
+    // if (req.files.logoLink) {
+    //   // Delete the previous image from Cloudinary
+    //   if (logoAndFavicon.logoPublicId) {
+    //     await cloudinary.uploader.destroy(logoAndFavicon.logoPublicId);
+    //   }
 
-      const faviconFile = req.files.faviconLink[0];
-      const faviconResult = await cloudinary.uploader.upload(faviconFile.path, {
-        folder: "dot_programmer",
-      });
-      updatedFields.faviconLink = faviconResult.secure_url;
-      updatedFields.faviconPublicId = faviconResult.public_id;
+    //   const logoFile = req.files.logoLink[0];
+    //   const logoResult = await cloudinary.uploader.upload(logoFile.path, {
+    //     folder: "dot_programmer",
+    //   });
+    //   updatedFields.logoLink = logoResult.secure_url;
+    //   updatedFields.logoPublicId = logoResult.public_id;
 
-      try {
-        if (fs.existsSync(req.files.faviconLink[0].path)) {
+    //   try {
+    //     if (fs.existsSync(req.files.logoLink[0].path)) {
+    //       fs.unlinkSync(req.files.logoLink[0].path);
+    //     }
+    //   } catch (deleteError) {
+    //     console.error("Error deleting file from server:", deleteError.message);
+    //   }
+    // }
 
-          fs.unlinkSync(req.files.faviconLink[0].path);
-        }
-      } catch (deleteError) {
-        console.error("Error deleting file from server:", deleteError.message);
-      }
-    }
+    // if (req.files.faviconLink) {
+    //   // Delete the previous image from Cloudinary
+    //   if (logoAndFavicon.faviconPublicId) {
+    //     await cloudinary.uploader.destroy(logoAndFavicon.faviconPublicId);
+    //   }
+
+    //   const faviconFile = req.files.faviconLink[0];
+    //   const faviconResult = await cloudinary.uploader.upload(faviconFile.path, {
+    //     folder: "dot_programmer",
+    //   });
+    //   updatedFields.faviconLink = faviconResult.secure_url;
+    //   updatedFields.faviconPublicId = faviconResult.public_id;
+
+    //   try {
+    //     if (fs.existsSync(req.files.faviconLink[0].path)) {
+    //       fs.unlinkSync(req.files.faviconLink[0].path);
+    //     }
+    //   } catch (deleteError) {
+    //     console.error("Error deleting file from server:", deleteError.message);
+    //   }
+    // }
 
     // Update database
     await LogoAndFavicon.findByIdAndUpdate(id, updatedFields, { new: true });

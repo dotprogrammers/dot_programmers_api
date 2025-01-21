@@ -1,5 +1,3 @@
-import fs from "fs";
-
 import cloudinary from "../config/cloudinary.config.js";
 import PagesSlider from "./../models/pagesSliders.modal.js";
 
@@ -88,45 +86,15 @@ const addPagesSlider = async (req, res) => {
       });
     }
 
-    // Upload to Cloudinary
-    const imagePath = req.file.path;
-    let cloudinaryResult;
-
-    try {
-      cloudinaryResult = await cloudinary.uploader.upload(imagePath, {
-        folder: "dot_programmer",
-      });
-    } catch (uploadError) {
-      try {
-        if (fs.existsSync(imagePath)) {
-          fs.unlinkSync(imagePath);
-        }
-      } catch (deleteError) {
-        console.error("Error deleting file from server:", deleteError.message);
-      }
-      return res.status(500).json({
-        success: false,
-        message: "Failed to upload image to Cloudinary",
-        error: uploadError.message,
-      });
-    }
-
-    // Delete the image from the server after successful upload
-    try {
-      if (fs.existsSync(imagePath)) {
-        fs.unlinkSync(imagePath);
-      }
-    } catch (deleteError) {
-      console.error("Error deleting file from server:", deleteError.message);
-    }
+    const cloudinaryResult = req.file;
 
     // Create a new pages sliders document
     const newPagesSlider = new PagesSlider({
       title,
       pageName,
       description,
-      image: cloudinaryResult.secure_url,
-      imagePublicId: cloudinaryResult.public_id,
+      image: cloudinaryResult.path,
+      imagePublicId: cloudinaryResult.filename,
       status: 1,
     });
 
@@ -164,7 +132,6 @@ const deletePagesSlider = async (req, res) => {
       });
     }
 
-    // Delete the image from Cloudinary
     if (pageSlider.image) {
       const publicId = pageSlider.imagePublicId;
 
@@ -182,7 +149,6 @@ const deletePagesSlider = async (req, res) => {
         });
       }
     }
-
     // Delete the Page Slider from the database
     await PagesSlider.findByIdAndDelete(id);
 
@@ -235,22 +201,14 @@ const updatePagesSlider = async (req, res) => {
 
     if (req.file) {
       try {
-        // Delete the previous image from Cloudinary
         if (pageSlider.imagePublicId) {
           await cloudinary.uploader.destroy(pageSlider.imagePublicId);
         }
-
-        // Upload the new image to Cloudinary
-        const cloudinaryResult = await cloudinary.uploader.upload(
-          req.file.path,
-          {
-            folder: "dot_programmer",
-          }
-        );
+        const cloudinaryResult = req.file;
 
         // Add the new image data to updated fields
-        updatedFields.image = cloudinaryResult.secure_url;
-        updatedFields.imagePublicId = cloudinaryResult.public_id;
+        updatedFields.image = cloudinaryResult.path;
+        updatedFields.imagePublicId = cloudinaryResult.filename;
       } catch (imageError) {
         return res.status(500).json({
           success: false,
@@ -258,15 +216,6 @@ const updatePagesSlider = async (req, res) => {
           error: imageError.message,
         });
       }
-    }
-
-    // Delete the image from the server after successful upload
-    try {
-      if (fs.existsSync(req.file.path)) {
-        fs.unlinkSync(req.file.path);
-      }
-    } catch (deleteError) {
-      console.error("Error deleting file from server:", deleteError.message);
     }
 
     // Update the database with the new fields

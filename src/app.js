@@ -2,11 +2,8 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
 import rateLimit from "express-rate-limit";
-import fs from "fs";
 import createHttpError from "http-errors";
 import morgan from "morgan";
-import path from "path";
-import { fileURLToPath } from "url";
 import aboutUsRouter from "./routers/aboutUs.router.js";
 import authRouter from "./routers/auth.router.js";
 import ceoRouter from "./routers/ceo.router.js";
@@ -49,15 +46,6 @@ const limiterApi = rateLimit({
   message: "Too many requests from this IP, Please Try Again Later!",
 });
 
-// Manually define __dirname
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const uploadDir = path.join(__dirname, "images");
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir);
-}
-
 // Middleware setup
 app.use(
   cors({
@@ -78,9 +66,6 @@ app.use(limiterApi);
 app.get("/", (req, res) => {
   res.send("Dot Programmer Server Running.");
 });
-
-// image upload middleware
-app.use("/images", express.static(path.join(__dirname, "images")));
 
 // All router middleware
 app.use("/api", authRouter);

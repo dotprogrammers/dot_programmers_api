@@ -1,5 +1,3 @@
-import fs from "fs";
-
 import mongoose from "mongoose";
 import cloudinary from "../config/cloudinary.config.js";
 import Portfolio from "./../models/portfolio.model.js";
@@ -121,44 +119,14 @@ const addPortfolio = async (req, res) => {
       });
     }
 
-    // Upload to Cloudinary
-    const imagePath = req.file.path;
-    let cloudinaryResult;
-
-    try {
-      cloudinaryResult = await cloudinary.uploader.upload(imagePath, {
-        folder: "dot_programmer",
-      });
-    } catch (uploadError) {
-      try {
-        if (fs.existsSync(imagePath)) {
-          fs.unlinkSync(imagePath);
-        }
-      } catch (deleteError) {
-        console.error("Error deleting file from server:", deleteError.message);
-      }
-      return res.status(500).json({
-        success: false,
-        message: "Failed to upload image to Cloudinary",
-        error: uploadError.message,
-      });
-    }
-
-    // Delete the image from the server after successful upload
-    try {
-      if (fs.existsSync(imagePath)) {
-        fs.unlinkSync(imagePath);
-      }
-    } catch (deleteError) {
-      console.error("Error deleting file from server:", deleteError.message);
-    }
+    const cloudinaryResult = req.file;
 
     // Create a new portfolio document
     const newPortfolio = new Portfolio({
       name,
       description,
-      image: cloudinaryResult.secure_url,
-      imagePublicId: cloudinaryResult.public_id,
+      image: cloudinaryResult.path,
+      imagePublicId: cloudinaryResult.filename,
       demoLink,
       category,
       status: 1,
@@ -253,25 +221,16 @@ const updatePortfolio = async (req, res) => {
 
     // Handle image update if a new file is provided
     let updatedFields = { ...otherFields };
-
     if (req.file) {
       try {
-        // Delete the previous image from Cloudinary
         if (portfolio.imagePublicId) {
           await cloudinary.uploader.destroy(portfolio.imagePublicId);
         }
-
-        // Upload the new image to Cloudinary
-        const cloudinaryResult = await cloudinary.uploader.upload(
-          req.file.path,
-          {
-            folder: "dot_programmer",
-          }
-        );
+        const cloudinaryResult = req.file;
 
         // Add the new image data to updated fields
-        updatedFields.image = cloudinaryResult.secure_url;
-        updatedFields.imagePublicId = cloudinaryResult.public_id;
+        updatedFields.image = cloudinaryResult.path;
+        updatedFields.imagePublicId = cloudinaryResult.filename;
       } catch (imageError) {
         return res.status(500).json({
           success: false,
@@ -279,15 +238,6 @@ const updatePortfolio = async (req, res) => {
           error: imageError.message,
         });
       }
-    }
-
-    // Delete the image from the server after successful upload
-    try {
-      if (fs.existsSync(req.file.path)) {
-        fs.unlinkSync(req.file.path);
-      }
-    } catch (deleteError) {
-      console.error("Error deleting file from server:", deleteError.message);
     }
 
     // Update the database with the new fields
