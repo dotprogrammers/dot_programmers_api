@@ -3,7 +3,12 @@ import cors from "cors";
 import express from "express";
 import rateLimit from "express-rate-limit";
 import createHttpError from "http-errors";
-import morgan from "morgan";
+import path from "path";
+import { fileURLToPath } from "url";
+// Resolve __dirname in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 import aboutUsRouter from "./routers/aboutUs.router.js";
 import authRouter from "./routers/auth.router.js";
 import ceoRouter from "./routers/ceo.router.js";
@@ -35,7 +40,9 @@ import technologyRouter from "./routers/technology.router.js";
 import termsAndConditionsRouter from "./routers/termsAndConditions.router.js";
 import testimonialRouter from "./routers/testimonial.router.js";
 const app = express();
-
+// Set view engine
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views")); // Adjust the path if necessary
 // middleware
 app.use(express.json());
 
@@ -59,14 +66,15 @@ app.use(
 );
 app.use(express.json());
 app.use(cookieParser());
-app.use(morgan("dev"));
 app.use(limiterApi);
 
 // Home route
 app.get("/", (req, res) => {
-  res.send("Dot Programmer Server Running.");
+  res.render("index", {
+    title: "Home",
+    message: "Dot Programmer Server Running...",
+  });
 });
-
 // All router middleware
 app.use("/api", authRouter);
 app.use("/api", serviceRouter);
