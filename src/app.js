@@ -59,7 +59,11 @@ app.use(
     origin: [
       "http://localhost:5173",
       "http://localhost:3000",
+      "http://localhost:5000",
+      "https://dot-programmers-api.vercel.app",
       "https://dot-programmer-private-admin.vercel.app",
+      "https://dot-programmers-admin.vercel.app",
+      "https://dot-programmers-landing.vercel.app",
     ],
     credentials: true,
   })
