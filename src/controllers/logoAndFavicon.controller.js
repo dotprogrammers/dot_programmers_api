@@ -50,8 +50,8 @@ const updateLogoAndFavicon = async (req, res) => {
 
         // Handle logo update
         if (logoFile) {
-          if (data.logoPublicId) {
-            await cloudinary.uploader.destroy(data.logoPublicId); // Delete old image
+          if (logoAndFavicon.logoPublicId) {
+            await cloudinary.uploader.destroy(logoAndFavicon.logoPublicId); // Delete old image
           }
           updatedFields.logoLink = logoFile.path; // Cloudinary URL for the image
           updatedFields.logoPublicId = logoFile.filename; // Cloudinary public ID
@@ -59,8 +59,8 @@ const updateLogoAndFavicon = async (req, res) => {
 
         // Handle favicon update
         if (faviconFile) {
-          if (data.faviconPublicId) {
-            await cloudinary.uploader.destroy(data.faviconPublicId); // Delete old logo
+          if (logoAndFavicon.faviconPublicId) {
+            await cloudinary.uploader.destroy(logoAndFavicon.faviconPublicId); // Delete old logo
           }
           updatedFields.faviconLink = faviconFile.path; // Cloudinary URL for the logo
           updatedFields.faviconPublicId = faviconFile.filename; // Cloudinary public ID
