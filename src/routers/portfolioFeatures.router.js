@@ -4,6 +4,7 @@ import {
   deletePortfolioFeatures,
   getPortfolioFeatures,
   updatePortfolioFeatures,
+  viewPortfolioFeatures,
 } from "../controllers/portfolioFeatures.controller.js";
 import paginationMiddleware from "../middlewares/pagination.middleware.js";
 import verifyToken from "../middlewares/verifyToken.js";
@@ -34,4 +35,9 @@ portfolioFeaturesRouter.patch(
   updatePortfolioFeatures
 );
 
+portfolioFeaturesRouter.get(
+  "/view-portfolio-feature/:id",
+  verifyToken,
+  viewPortfolioFeatures
+);
 export default portfolioFeaturesRouter;

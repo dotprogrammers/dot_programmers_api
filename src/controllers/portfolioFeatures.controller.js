@@ -201,9 +201,45 @@ const updatePortfolioFeatures = async (req, res) => {
   }
 };
 
+const viewPortfolioFeatures = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide portfolio feature id!",
+      });
+    }
+
+    // Find the portfolio feature by ID and populate features
+    const portfolioFeature = await Portfolio.findById(id).populate("features");
+    if (!portfolioFeature) {
+      return res.status(404).json({
+        success: false,
+        message: "Portfolio feature not found.",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Portfolio feature data retrieved successfully.",
+      payload: portfolioFeature?.features || [],
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message:
+        error.message ||
+        "An error occurred while viewing the portfolio feature.",
+    });
+  }
+};
+
 export {
   addPortfolioFeatures,
   deletePortfolioFeatures,
   getPortfolioFeatures,
   updatePortfolioFeatures,
+  viewPortfolioFeatures,
 };
