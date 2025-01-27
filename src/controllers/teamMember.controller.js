@@ -35,8 +35,7 @@ const getTeamMembers = async (req, res) => {
 
 const addTeamMember = async (req, res) => {
   try {
-    const { name, designation, facebookLink, linkedinLink, whatsappNumber } =
-      req.body;
+    const { name, designation } = req.body;
 
     // Ensure file is uploaded
     if (!req.file) {
@@ -50,7 +49,7 @@ const addTeamMember = async (req, res) => {
     const missingFields = [];
     if (!name) missingFields.push("Name");
     if (!designation) missingFields.push("Designation");
-    if (!whatsappNumber) missingFields.push("Whatsapp Number");
+    // if (!whatsappNumber) missingFields.push("Whatsapp Number");
 
     if (missingFields.length > 0) {
       return res.status(400).json({
@@ -65,9 +64,9 @@ const addTeamMember = async (req, res) => {
     const newTeamMember = new TeamMember({
       name,
       designation,
-      facebookLink,
-      linkedinLink,
-      whatsappNumber,
+      // facebookLink,
+      // linkedinLink,
+      // whatsappNumber,
       image: cloudinaryResult.path,
       imagePublicId: cloudinaryResult.filename,
       status: 1,

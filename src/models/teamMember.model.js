@@ -7,12 +7,12 @@ const teamMemberSchema = new Schema(
       type: String,
       required: [true, "Member designation required!"],
     },
-    facebookLink: { type: String },
-    linkedinLink: { type: String },
-    whatsappNumber: {
-      type: String,
-      required: [true, "Member whatsapp number required!"],
-    },
+    // facebookLink: { type: String },
+    // linkedinLink: { type: String },
+    // whatsappNumber: {
+    //   type: String,
+    //   // required: [true, "Member whatsapp number required!"],
+    // },
     image: { type: String, required: [true, "Member image required!"] },
     imagePublicId: { type: String },
     status: { type: Number, default: 1 },
