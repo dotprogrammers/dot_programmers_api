@@ -7,7 +7,8 @@ export const connectDb = async () => {
     const db = process.env.DB_NAME;
 
     const connection = await mongoose.connect(
-      `mongodb+srv://${user}:${pass}@cluster0.bljc97k.mongodb.net/${db}?retryWrites=true&w=majority`
+      `mongodb+srv://${user}:${pass}@lustermehedi.v8xdn.mongodb.net/${db}?retryWrites=true&w=majority`
+      // `mongodb+srv://${process.env.MONGODB_USERNAME}:${process.env.MONGODB_PASSWORD}@clustermehedi.v8xdn.mongodb.net/${process.env.DB_NAME}`
     );
 
     console.log("✅ Database Connected:", connection.connection.host);
