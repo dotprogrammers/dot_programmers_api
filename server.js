@@ -13,11 +13,9 @@ connectDb()
 
     // Start the server
     const PORT = process.env.PORT || 5000;
-    // app.listen(PORT, () => {
-    //   console.log(`Server Running On PORT: ${PORT}`);
-    // });
-
-    app.listen();
+    app.listen(PORT, () => {
+      console.log(`Server Running On PORT: ${PORT}`);
+    });
   })
   .catch((error) => {
     console.error("Database Server Connection Error:", error);
